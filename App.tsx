@@ -1,13 +1,13 @@
 
 import React, { useEffect, useState } from 'react';
-import { supabase } from './supabase';
-import Auth from './components/Auth';
-import Layout from './components/Layout';
-import Dashboard from './components/Dashboard';
-import BusinessManager from './components/BusinessManager';
-import AIReplyGenerator from './components/AIReplyGenerator';
-import AIPostGenerator from './components/AIPostGenerator';
-import SOPManager from './components/SOPManager';
+import { supabase } from './supabase.ts';
+import Auth from './components/Auth.tsx';
+import Layout from './components/Layout.tsx';
+import Dashboard from './components/Dashboard.tsx';
+import BusinessManager from './components/BusinessManager.tsx';
+import AIReplyGenerator from './components/AIReplyGenerator.tsx';
+import AIPostGenerator from './components/AIPostGenerator.tsx';
+import SOPManager from './components/SOPManager.tsx';
 import { Session } from '@supabase/supabase-js';
 
 const App: React.FC = () => {
@@ -16,7 +16,6 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'sop' | 'businesses' | 'reply' | 'post'>('dashboard');
 
   useEffect(() => {
-    // 1. Initial session check
     const checkSession = async () => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
@@ -30,17 +29,12 @@ const App: React.FC = () => {
 
     checkSession();
 
-    // 2. Continuous listener for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
       setSession(currentSession);
       setLoading(false);
 
       if (_event === 'SIGNED_IN') {
         setActiveTab('dashboard');
-      }
-      if (_event === 'SIGNED_OUT') {
-        setActiveTab('dashboard'); // Reset tab on logout
-        localStorage.removeItem('rankly_sop_tasks'); // Clean up local storage if desired
       }
     });
 
@@ -49,7 +43,6 @@ const App: React.FC = () => {
     };
   }, []);
 
-  // Full screen loader to prevent UI flickering
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-brand-black" dir="rtl">
@@ -62,12 +55,10 @@ const App: React.FC = () => {
     );
   }
 
-  // If no session, show Auth screen
   if (!session) {
     return <Auth />;
   }
 
-  // Protected application shell
   return (
     <Layout 
       activeTab={activeTab} 
