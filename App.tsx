@@ -8,12 +8,13 @@ import BusinessManager from './components/BusinessManager.tsx';
 import AIReplyGenerator from './components/AIReplyGenerator.tsx';
 import AIPostGenerator from './components/AIPostGenerator.tsx';
 import SOPManager from './components/SOPManager.tsx';
+import Profile from './components/Profile.tsx';
 import { Session } from '@supabase/supabase-js';
 
 const App: React.FC = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'sop' | 'businesses' | 'reply' | 'post'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'sop' | 'businesses' | 'reply' | 'post' | 'profile'>('dashboard');
 
   useEffect(() => {
     const checkSession = async () => {
@@ -45,12 +46,12 @@ const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-brand-black" dir="rtl">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#050505]" dir="rtl">
         <div className="relative w-20 h-20">
-          <div className="absolute inset-0 border-4 border-brand-gold/20 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-brand-gold/10 rounded-full"></div>
           <div className="absolute inset-0 border-4 border-brand-gold border-t-transparent rounded-full animate-spin"></div>
         </div>
-        <p className="mt-6 text-brand-gold font-bold text-lg animate-pulse tracking-widest">تحميل رانكلي IQ...</p>
+        <p className="mt-6 text-brand-gold font-bold text-lg animate-pulse tracking-widest">RANKLY IQ</p>
       </div>
     );
   }
@@ -71,6 +72,7 @@ const App: React.FC = () => {
         {activeTab === 'businesses' && <BusinessManager user={session.user} />}
         {activeTab === 'reply' && <AIReplyGenerator user={session.user} />}
         {activeTab === 'post' && <AIPostGenerator user={session.user} />}
+        {activeTab === 'profile' && <Profile user={session.user} />}
       </div>
     </Layout>
   );

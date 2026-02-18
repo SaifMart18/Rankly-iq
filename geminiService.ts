@@ -1,20 +1,33 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-// Ensure process.env.API_KEY is used exactly as per guidelines
 const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-export const generateReviewReply = async (review: string) => {
+export type ReplyTone = 'professional' | 'iraqi' | 'friendly' | 'short';
+
+export const generateReviewReply = async (review: string, tone: ReplyTone = 'iraqi') => {
   const ai = getAI();
+  
+  const toneInstructions = {
+    professional: "استخدم لغة عربية فصحى احترافية جداً، ركز على الامتنان والحلول العملية.",
+    iraqi: "استخدم لهجة عراقية بغدادية محببة وودودة جداً، استخدم مفردات مثل 'عيني، تدلل، نورتنا، غالي'.",
+    friendly: "مزيج بين الفصحى البسيطة والود، كأنك تتحدث مع صديق.",
+    short: "رد سريع ومباشر جداً، لا يتجاوز جملتين."
+  };
+
   const prompt = `
-    You are an expert customer service manager for a business in Iraq.
-    A customer left the following review on Google Business Profile: "${review}"
+    أنت خبير خدمة عملاء وبراندينج في العراق تعمل لدى Rankly IQ.
+    المهمة: توليد رد على تقييم عميل في "Google Business Profile".
     
-    Please generate a warm, professional, and friendly response.
-    - Provide the response in both Modern Standard Arabic AND Iraqi Dialect (لهجة عراقية).
-    - If the review is positive, thank them and invite them back.
-    - If the review is negative, apologize professionally and ask them to contact support.
-    - Keep it concise.
+    نص التقييم: "${review}"
+    النبرة المطلوبة: ${toneInstructions[tone]}
+    
+    القواعد:
+    1. ابدأ بالتحية باسم النشاط (إذا لم يذكر، افترض أنه 'مركزنا').
+    2. إذا كان التقييم إيجابياً: عبر عن سعادة غامرة وادعُ العميل للزيارة القادمة.
+    3. إذا كان التقييم سلبياً: كن متفهماً جداً، اعتذر بلباقة، واطلب منه التواصل خاص لحل المشكلة (بدون وعود كاذبة).
+    4. اجعل الرد يبدو كأنه من إنسان وليس روبوت.
+    5. لا تزد عن 3-4 جمل.
   `;
 
   try {
@@ -22,8 +35,9 @@ export const generateReviewReply = async (review: string) => {
       model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
-        temperature: 0.7,
-        topP: 0.9,
+        temperature: 0.8,
+        topP: 0.95,
+        thinkingConfig: { thinkingBudget: 0 } // تعطيل التفكير العميق لسرعة البرق في الردود البسيطة
       },
     });
 

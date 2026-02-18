@@ -12,16 +12,9 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ user, setActiveTab }) => {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sopProgress, setSopProgress] = useState(0);
 
   useEffect(() => {
     fetchBusinesses();
-    const savedSop = localStorage.getItem('rankly_sop_tasks');
-    if (savedSop) {
-      const tasks = JSON.parse(savedSop);
-      const progress = Math.round((tasks.filter((t: any) => t.completed).length / tasks.length) * 100);
-      setSopProgress(progress);
-    }
   }, []);
 
   const fetchBusinesses = async () => {
@@ -35,134 +28,181 @@ const Dashboard: React.FC<DashboardProps> = ({ user, setActiveTab }) => {
       if (error) throw error;
       if (data) setBusinesses(data);
     } catch (err) {
-      console.error('Error fetching businesses:', err);
+      console.error('Error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const calculateAverageScore = () => {
-    if (businesses.length === 0) return 0;
-    const sum = businesses.reduce((acc, b) => acc + (b.score || 0), 0);
-    return Math.round(sum / businesses.length);
-  };
-
-  const getTrend = (score: number, id: string) => {
-    const seed = id.charCodeAt(0) + id.charCodeAt(id.length - 1);
-    const isUp = (seed + score) % 2 === 0;
-    const value = (seed % 5) + 2;
-    
-    return {
-      isUp,
-      value: value + '%',
-      color: isUp ? 'text-green-400' : 'text-red-400',
-      bg: isUp ? 'bg-green-500/10' : 'bg-red-500/10',
-      icon: isUp ? (
-        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 10l7-7 7 7M12 3v18" /></svg>
-      ) : (
-        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 14l-7 7-7-7M12 21V3" /></svg>
-      )
-    };
-  };
-
   return (
-    <div className="space-y-8 max-w-5xl mx-auto page-transition">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-4xl font-black mb-1">هلا بيك 👋</h2>
-          <p className="text-white/40">تابع نمو نشاطك التجاري في {businesses[0]?.city || 'العراق'} اليوم.</p>
-        </div>
-        <div className="flex items-center gap-2 bg-brand-gray px-4 py-2 rounded-2xl border border-white/5">
-          <span className="w-2 h-2 bg-brand-gold rounded-full animate-pulse"></span>
-          <span className="text-xs text-white/40 font-bold">مباشر • {new Date().toLocaleTimeString('ar-IQ')}</span>
-        </div>
-      </header>
-
-      {/* Grid Stats */}
+    <div className="space-y-8 animate-in fade-in duration-700">
+      {/* Top Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-brand-gray border border-white/5 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
-             <svg className="w-40 h-40 text-brand-gold" fill="currentColor" viewBox="0 0 24 24"><path d="M13 3v11h8v-2h-6V3h-2zm-2 0H3v2h6v6H3v2h8V3zM3 21h8v-6H3v2h6v4H3v2zm10 0h8v-2h-6v-6h6v-2h-8v8h2v2z"/></svg>
-          </div>
-          <div className="relative z-10">
-            <h3 className="text-sm font-bold text-white/30 uppercase tracking-[0.2em] mb-4">القوة التسويقية الكلية</h3>
-            <div className="text-brand-gold text-8xl font-black mb-6 tabular-nums drop-shadow-2xl">{calculateAverageScore()}<span className="text-3xl font-light opacity-50">%</span></div>
-            <div className="flex items-center gap-4">
-              <div className="flex-1 h-3 bg-brand-black rounded-full overflow-hidden">
-                <div className="h-full bg-brand-gold transition-all duration-1000" style={{ width: `${calculateAverageScore()}%` }}></div>
-              </div>
-              <p className="text-xs text-white/40 font-medium">هدفنا الوصول إلى 100%</p>
+        
+        {/* Main Chart - Area Chart Simulation */}
+        <div className="lg:col-span-2 bg-[#0C0C0C] rounded-[2.5rem] p-8 border border-white/5 relative overflow-hidden group">
+          <div className="flex justify-between items-start mb-8">
+            <div>
+              <h3 className="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">CDN usage</h3>
+              <p className="text-white/20 text-[10px]">Last 28 days</p>
             </div>
+            <div className="text-right">
+              <span className="text-2xl font-black text-white tabular-nums">1.4 K</span>
+            </div>
+          </div>
+          
+          {/* Mock Area Chart SVG */}
+          <div className="h-48 w-full mt-4">
+            <svg viewBox="0 0 400 100" className="w-full h-full preserve-3d">
+              <defs>
+                <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style={{stopColor:'rgba(255,255,255,0.1)', stopOpacity:1}} />
+                  <stop offset="100%" style={{stopColor:'rgba(255,255,255,0)', stopOpacity:1}} />
+                </linearGradient>
+              </defs>
+              <path 
+                d="M0 80 Q 50 20, 100 60 T 200 40 T 300 70 T 400 30 V 100 H 0 Z" 
+                fill="url(#grad)" 
+              />
+              <path 
+                d="M0 80 Q 50 20, 100 60 T 200 40 T 300 70 T 400 30" 
+                fill="none" 
+                stroke="white" 
+                strokeWidth="1.5" 
+                strokeOpacity="0.4"
+              />
+              {/* Data points */}
+              <circle cx="210" cy="45" r="3" fill="white" className="animate-pulse" />
+              <rect x="200" y="10" width="40" height="20" rx="4" fill="white" fillOpacity="0.1" />
+              <text x="205" y="24" fontSize="8" fill="white" fontWeight="bold">56,000 B</text>
+            </svg>
+          </div>
+          <div className="flex justify-between mt-4 text-[9px] text-white/20 font-bold uppercase tracking-widest px-2">
+            <span>Jul 1</span>
+            <span>Jul 7</span>
+            <span>Jul 14</span>
+            <span>Jul 21</span>
+            <span>Jul 28</span>
           </div>
         </div>
 
-        <div 
-          onClick={() => setActiveTab('sop')}
-          className="bg-brand-gold/10 border border-brand-gold/20 p-8 rounded-[2rem] cursor-pointer hover:bg-brand-gold/20 transition-all group flex flex-col justify-between"
-        >
-          <div>
-            <div className="flex justify-between items-start mb-6">
-              <div className="bg-brand-gold text-brand-black p-3 rounded-2xl shadow-xl group-hover:rotate-12 transition-transform">
-                <svg className="w-6 h-6 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              </div>
-              <span className="text-4xl font-black text-brand-gold">{sopProgress}%</span>
-            </div>
-            <h3 className="text-xl font-black mb-2">خطة SOP</h3>
-            <p className="text-sm text-brand-gold/60 leading-relaxed font-medium">أكمل المهام المتبقية لرفع مستوى ظهورك في الخرائط.</p>
+        {/* Donut Chart - Resource Usage */}
+        <div className="bg-[#0C0C0C] rounded-[2.5rem] p-8 border border-white/5 flex flex-col items-center">
+          <div className="w-full flex justify-between items-center mb-10">
+            <h3 className="text-white/40 text-xs font-bold uppercase tracking-widest">Resource Usage</h3>
+            <span className="text-white/20 text-[9px]">Last 30 days</span>
           </div>
-          <div className="mt-8 flex items-center gap-2 text-xs font-black text-brand-gold underline underline-offset-4 decoration-2 uppercase">
-            <span>اكمل الخطة الآن</span>
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M10 19l-7-7 7-7" /></svg>
+          
+          <div className="relative w-40 h-40 mb-8">
+             <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
+                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#1a1a1a" strokeWidth="3" />
+                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#FFC300" strokeWidth="3" strokeDasharray="30 70" />
+                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#4FD1C5" strokeWidth="3" strokeDasharray="20 80" strokeDashoffset="-30" />
+                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#F56565" strokeWidth="3" strokeDasharray="15 85" strokeDashoffset="-50" />
+             </svg>
+             <div className="absolute inset-0 flex items-center justify-center flex-col">
+                <span className="text-3xl font-black">74%</span>
+                <span className="text-[8px] text-white/20 uppercase font-bold">Used</span>
+             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 w-full">
+            <div className="p-3 bg-white/5 rounded-2xl border border-white/5">
+              <p className="text-[8px] text-white/30 uppercase mb-1">Disk Usage</p>
+              <p className="text-xs font-bold">2.56 GB of 10 GB</p>
+            </div>
+            <div className="p-3 bg-white/5 rounded-2xl border border-white/5">
+              <p className="text-[8px] text-white/30 uppercase mb-1">CDN Usage</p>
+              <p className="text-xs font-bold">35 MB of 1 GB</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Activities Section */}
-      <section>
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-black">نشاطاتك المضافة</h3>
-          <button onClick={() => setActiveTab('businesses')} className="text-brand-gold text-sm font-bold hover:underline bg-brand-gold/5 px-4 py-2 rounded-xl border border-brand-gold/10">إدارة الكل</button>
+      {/* Middle Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* Data Transfer Chart */}
+        <div className="bg-[#0C0C0C] rounded-[2.5rem] p-8 border border-white/5">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">Data transfer</h3>
+              <p className="text-white/20 text-[9px]">Last 7 days</p>
+            </div>
+            <span className="text-xl font-black tabular-nums">7.45 KB</span>
+          </div>
+          <div className="h-24">
+             <svg viewBox="0 0 200 40" className="w-full h-full">
+                <path d="M0 30 L20 25 L40 35 L60 20 L80 25 L100 15 L120 30 L140 22 L160 28 L180 18 L200 25" fill="none" stroke="white" strokeWidth="1" strokeOpacity="0.5" />
+             </svg>
+          </div>
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[1, 2].map(i => <div key={i} className="h-32 bg-brand-gray animate-pulse rounded-3xl"></div>)}
+        {/* Unique Visits Bar Chart */}
+        <div className="bg-[#0C0C0C] rounded-[2.5rem] p-8 border border-white/5">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h3 className="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">Unique visits</h3>
+              <p className="text-white/20 text-[9px]">Last 7 days</p>
+            </div>
+            <span className="text-xl font-black tabular-nums">1242</span>
           </div>
-        ) : businesses.length === 0 ? (
-          <div className="p-16 border border-dashed border-white/10 rounded-[2.5rem] text-center bg-brand-gray/30">
-            <p className="text-white/40 mb-8 text-lg">لا يوجد نشاط تجاري للمتابعة بعد.</p>
-            <button onClick={() => setActiveTab('businesses')} className="px-12 py-4 bg-brand-gold text-brand-black font-black rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-brand-gold/20">ابدأ بإضافة نشاطك الأول</button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {businesses.map(b => {
-              const trend = getTrend(b.score, b.id);
-              return (
-                <div key={b.id} className="bg-brand-gray border border-white/5 p-6 rounded-[2rem] flex items-center justify-between group hover:border-brand-gold/30 hover:shadow-2xl transition-all duration-500">
-                  <div className="flex items-center gap-5">
-                    <div className="w-16 h-16 bg-brand-black rounded-[1.25rem] flex items-center justify-center font-black text-brand-gold text-2xl shadow-inner border border-white/5 group-hover:scale-110 transition-transform">
-                      {b.business_name[0]}
-                    </div>
-                    <div>
-                      <h4 className="font-black text-xl mb-1">{b.business_name}</h4>
-                      <p className="text-sm text-white/30 font-medium">{b.city} • العراق</p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    <div className="bg-brand-black/50 px-6 py-2 rounded-2xl border border-white/5 text-brand-gold font-black text-xl min-w-[80px] text-center">
-                      {b.score}%
-                    </div>
-                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${trend.bg} ${trend.color} text-[10px] font-black`}>
-                      {trend.icon}
-                      <span>{trend.value}</span>
-                    </div>
-                  </div>
+          <div className="flex items-end justify-between h-24 gap-2">
+            {[40, 70, 30, 90, 60, 45, 80].map((h, i) => (
+              <div key={i} className="flex-1 bg-white/10 rounded-t-lg relative group transition-all hover:bg-white/20" style={{ height: `${h}%` }}>
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-white text-black text-[8px] font-black px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                  {h * 12}
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
-        )}
-      </section>
+        </div>
+      </div>
+
+      {/* Table Section: Your Sites */}
+      <div className="bg-[#0C0C0C] rounded-[3rem] p-8 border border-white/5">
+        <div className="flex justify-between items-center mb-8">
+          <h3 className="text-lg font-black tracking-tight">Your Sites</h3>
+          <button onClick={() => setActiveTab('businesses')} className="text-white/20 text-xs font-bold hover:text-brand-gold transition-colors">View All</button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-right">
+            <thead>
+              <tr className="text-white/20 text-[10px] uppercase tracking-widest border-b border-white/5">
+                <th className="pb-4 font-black">Name</th>
+                <th className="pb-4 font-black">Location</th>
+                <th className="pb-4 font-black text-left">Score</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {businesses.slice(0, 4).map(site => (
+                <tr key={site.id} className="group hover:bg-white/[0.02] transition-colors">
+                  <td className="py-6 font-bold text-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[10px] font-black group-hover:bg-brand-gold group-hover:text-black transition-colors">{site.business_name[0]}</div>
+                      {site.business_name}
+                    </div>
+                  </td>
+                  <td className="py-6 text-xs text-white/40">{site.city}</td>
+                  <td className="py-6 text-left">
+                    <span className="bg-brand-gold/10 text-brand-gold text-[11px] font-black px-3 py-1.5 rounded-full border border-brand-gold/20">
+                      {site.score}%
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {businesses.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="py-20 text-center text-white/20 font-bold italic">
+                    No active sites found. Add your first business to start monitoring.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };
